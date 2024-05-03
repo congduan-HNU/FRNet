@@ -1,3 +1,52 @@
+from einops import rearrange
+class DepthPointConvModuleGroup(nn.Module):
+    def __init__(self, in_channel, mid_channel, out_channel, kernel_size=3, stride=1, padding=1, dilation=(1, 1)):
+        super(DepthPointConvModuleGroup, self).__init__()
+        layer = []
+        # extend批量插入
+        layer.extend([
+            nn.Conv2d(in_channel, mid_channel, kernel_size=(kernel_size, kernel_size), stride=(stride, stride), padding=(padding, padding), groups=in_channel, bias=False, dilation=dilation),
+            nn.Conv2d(mid_channel, out_channel, kernel_size=(1, 1), stride=(1, 1), bias=False),
+            nn.BatchNorm2d(out_channel),
+            nn.LeakyReLU(inplace=True)
+        ])
+
+        self.layer = nn.Sequential(*layer)
+    def forward(self, x):
+        return self.layer(x)
+
+
+class ConvModule(nn.Module):
+    def __init__(self, in_channel, out_channel, kernel_size=3, stride=1, padding=1):
+        super(ConvModule, self).__init__()
+        layer = []
+        # extend批量插入
+        layer.extend([
+            nn.Conv2d(in_channel, out_channel, kernel_size=(kernel_size, kernel_size), stride=(stride, stride), padding=(padding, padding), bias=False),
+            nn.BatchNorm2d(out_channel),
+            nn.LeakyReLU(inplace=True)
+        ])
+
+        self.layer = nn.Sequential(*layer)
+    def forward(self, x):
+        return self.layer(x)
+
+class DepthPointConvModule(nn.Module):
+    def __init__(self, in_channel, out_channel, kernel_size=3, stride=1, padding=1, dilation=(1, 1)):
+        super(DepthPointConvModule, self).__init__()
+        layer = []
+        # extend批量插入
+        layer.extend([
+            nn.Conv2d(in_channel, in_channel, kernel_size=(kernel_size, kernel_size), stride=(stride, stride), padding=(padding, padding), groups=in_channel, bias=False, dilation=dilation),
+            nn.Conv2d(in_channel, out_channel, kernel_size=(1, 1), stride=(1, 1), bias=False),
+            nn.BatchNorm2d(out_channel),
+            nn.LeakyReLU(inplace=True)
+        ])
+
+        self.layer = nn.Sequential(*layer)
+    def forward(self, x):
+        return self.layer(x)
+
 class ours_v5_0(nn.Module):
     def __init__(self, **kwargs):
         # patch_size 为后面所接主干网络的w,h，
